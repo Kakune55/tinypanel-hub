@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "IBM Plex Sans", "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --bg: #f6f6f2;
   --panel: #ffffff;
   --panel-soft: #f0f1ed;
@@ -21,7 +21,9 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(15, 123, 95, .08), transparent 28%),
+    linear-gradient(180deg, #fbfbf7, var(--bg));
   color: var(--ink);
 }
 
@@ -79,6 +81,11 @@ select {
   min-height: 40px;
   padding: 10px 12px;
   outline: none;
+}
+
+.compact-select {
+  width: auto;
+  min-width: 132px;
 }
 
 textarea {
@@ -142,6 +149,58 @@ main {
 .stack {
   display: grid;
   gap: 16px;
+}
+
+.overview-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background:
+    linear-gradient(160deg, rgba(15, 123, 95, .12), rgba(255, 255, 255, .9) 42%),
+    var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.overview-card h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.05;
+}
+
+.overview-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.overview-stats div,
+.stat-chip {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(0, 0, 0, .06);
+}
+
+.overview-stats span,
+.stat-chip span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.overview-stats strong,
+.stat-chip strong {
+  font-size: 15px;
 }
 
 .section {
@@ -309,6 +368,132 @@ main {
   gap: 16px;
 }
 
+.detail-panel {
+  grid-column: 1 / -1;
+}
+
+.detail-card {
+  display: grid;
+  gap: 14px;
+}
+
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detail-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.detail-meta,
+.stats-strip,
+.data-points,
+.forecast-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-meta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stats-strip {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.data-points {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.forecast-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.forecast-card {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+.forecast-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.chart-card {
+  display: grid;
+  gap: 10px;
+  min-height: 220px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.chart-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chart-title span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.chart-title strong {
+  font-size: 18px;
+}
+
+.chart-box {
+  min-height: 160px;
+}
+
+.trend-chart {
+  display: block;
+  width: 100%;
+  height: 160px;
+}
+
+.trend-axis {
+  stroke: rgba(21, 22, 18, .12);
+  stroke-width: 1;
+}
+
+.trend-area {
+  opacity: .16;
+}
+
+.trend-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trend-dot {
+  stroke: var(--panel);
+  stroke-width: 2;
+}
+
+.trend-label {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
 .list {
   display: grid;
   gap: 10px;
@@ -321,6 +506,10 @@ main {
   border-radius: var(--radius);
   padding: 12px;
   background: var(--panel);
+}
+
+.item textarea {
+  min-height: 72px;
 }
 
 .item-row {
@@ -347,7 +536,7 @@ main {
 }
 
 .mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .notice {
@@ -465,6 +654,15 @@ pre {
 
   main {
     padding: 18px;
+  }
+
+  .detail-meta,
+  .overview-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr;
   }
 }
 

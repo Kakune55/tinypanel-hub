@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	maxMessages  = 100
-	maxTelemetry = 500
+	maxMessages          = 100
+	maxSnapshotTelemetry = 500
+	maxTelemetryHistory  = 5000
 )
 
 var (
@@ -41,7 +42,7 @@ func OpenFiles(statePath, telemetryPath string) (*FileStore, error) {
 		return nil, err
 	}
 
-	items, err := s.telemetry.loadRecent(maxTelemetry)
+	items, err := s.telemetry.loadRecent(maxTelemetryHistory)
 	if err != nil {
 		return nil, err
 	}

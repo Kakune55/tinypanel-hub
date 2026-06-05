@@ -8,15 +8,17 @@ import (
 	"tinypanel-hub/internal/domain"
 )
 
+const telemetryLimitMax = 5000
+
 func (s *Server) handleGetTelemetry(w http.ResponseWriter, r *http.Request) {
-	limit := queryInt(r, "limit", 50, 1, 500)
+	limit := queryInt(r, "limit", 50, 1, telemetryLimitMax)
 	writeJSON(w, http.StatusOK, s.services.Telemetry.List(limit))
 }
 
 func (s *Server) handleGetDeviceTelemetry(w http.ResponseWriter, r *http.Request) {
 	user, _ := currentUser(r)
 	deviceID := pathString(r, "device_id")
-	limit := queryInt(r, "limit", 50, 1, 500)
+	limit := queryInt(r, "limit", 50, 1, telemetryLimitMax)
 	writeJSON(w, http.StatusOK, s.services.Telemetry.DeviceList(user.ID, deviceID, limit))
 }
 

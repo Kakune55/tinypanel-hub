@@ -106,7 +106,7 @@ GET /api/v1/devices/{device_id}/telemetry?limit=50
 Authorization: Bearer alice-token
 ```
 
-`limit` 范围为 `1` 到 `500`，默认 `50`。
+`limit` 范围为 `1` 到 `5000`，默认 `50`。
 
 响应按新到旧排序。
 

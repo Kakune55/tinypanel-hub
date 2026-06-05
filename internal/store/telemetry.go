@@ -32,7 +32,7 @@ func (s *FileStore) DeviceTelemetry(ownerID, deviceID string, limit int) []domai
 		return nil
 	}
 
-	items, err := s.telemetry.loadRecent(maxTelemetry)
+	items, err := s.telemetry.loadRecent(maxTelemetryHistory)
 	if err != nil {
 		return nil
 	}

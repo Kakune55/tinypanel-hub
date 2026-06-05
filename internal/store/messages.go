@@ -14,11 +14,11 @@ func (s *FileStore) Snapshot(ownerID string) domain.Snapshot {
 	weather := s.state.data.Weather
 	s.mu.RUnlock()
 
-	telemetry, err := s.telemetry.loadRecent(maxTelemetry)
+	telemetry, err := s.telemetry.loadRecent(maxSnapshotTelemetry)
 	if err != nil {
 		telemetry = nil
 	}
-	telemetry = filterTelemetryByDevices(telemetry, deviceIDs, maxTelemetry)
+	telemetry = filterTelemetryByDevices(telemetry, deviceIDs, maxSnapshotTelemetry)
 	reverseTelemetry(telemetry)
 	return domain.Snapshot{
 		Weather:   weather,

@@ -53,6 +53,42 @@ func TestTelemetryUsesJSONL(t *testing.T) {
 	}
 }
 
+func TestDeviceTelemetryKeepsExtendedHistory(t *testing.T) {
+	dir := t.TempDir()
+	statePath := filepath.Join(dir, "state.json")
+	telemetryPath := filepath.Join(dir, "telemetry.jsonl")
+
+	s, err := OpenFiles(statePath, telemetryPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	user, err := s.CreateUser("Alice", "alice@example.com", "user-token-hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	hello, err := s.HelloDevice("tinypanel-001", "device-secret-hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, bound, err := s.BindDevice(user.ID, hello.BindCode, "书桌屏幕"); err != nil || !bound {
+		t.Fatalf("bind bound=%v err=%v", bound, err)
+	}
+
+	for i := int64(1); i <= 700; i++ {
+		if _, err := s.AddTelemetry(telemetryFixture(i)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	got := s.DeviceTelemetry(user.ID, "tinypanel-001", 650)
+	if len(got) != 650 {
+		t.Fatalf("device telemetry len = %d, want 650", len(got))
+	}
+	if got[0].ID != 700 || got[len(got)-1].ID != 51 {
+		t.Fatalf("device telemetry window first=%d last=%d", got[0].ID, got[len(got)-1].ID)
+	}
+}
+
 func TestDeviceBindingAndMessagesPersist(t *testing.T) {
 	dir := t.TempDir()
 	statePath := filepath.Join(dir, "state.json")

@@ -8,23 +8,15 @@ import (
 
 func (s *FileStore) Snapshot(ownerID string) domain.Snapshot {
 	s.mu.RLock()
-	deviceIDs := s.ownerDeviceIDsLocked(ownerID)
 	messages := s.ownerMessagesLocked(ownerID)
 	todos := s.ownerTodosLocked(ownerID)
 	weather := s.state.data.Weather
 	s.mu.RUnlock()
 
-	telemetry, err := s.telemetry.loadRecent(maxSnapshotTelemetry)
-	if err != nil {
-		telemetry = nil
-	}
-	telemetry = filterTelemetryByDevices(telemetry, deviceIDs, maxSnapshotTelemetry)
-	reverseTelemetry(telemetry)
 	return domain.Snapshot{
-		Weather:   weather,
-		Messages:  messages,
-		Todos:     todos,
-		Telemetry: telemetry,
+		Weather:  weather,
+		Messages: messages,
+		Todos:    todos,
 	}
 }
 
@@ -34,36 +26,12 @@ func (s *FileStore) Weather() domain.Weather {
 	return s.state.data.Weather
 }
 
-func (s *FileStore) ownerDeviceIDsLocked(ownerID string) map[string]bool {
-	out := map[string]bool{}
-	for _, device := range s.state.data.Devices {
-		if device.OwnerID == ownerID {
-			out[device.ID] = true
-		}
-	}
-	return out
-}
-
 func (s *FileStore) ownerMessagesLocked(ownerID string) []domain.Message {
 	var out []domain.Message
 	for i := len(s.state.data.Messages) - 1; i >= 0; i-- {
 		msg := s.state.data.Messages[i]
 		if msg.OwnerID == ownerID {
 			out = append(out, msg)
-		}
-	}
-	return out
-}
-
-func filterTelemetryByDevices(items []domain.Telemetry, deviceIDs map[string]bool, limit int) []domain.Telemetry {
-	out := make([]domain.Telemetry, 0, len(items))
-	for i := len(items) - 1; i >= 0; i-- {
-		if !deviceIDs[items[i].DeviceID] {
-			continue
-		}
-		out = append(out, items[i])
-		if limit > 0 && len(out) >= limit {
-			break
 		}
 	}
 	return out
@@ -116,7 +84,7 @@ func (s *FileStore) PendingDeviceMessages(deviceID string, limit int) []domain.M
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var out []domain.Message
+	out := make([]domain.Message, 0)
 	for _, msg := range s.state.data.Messages {
 		if msg.DeviceID != deviceID || msg.Status != domain.MessageStatusPending {
 			continue

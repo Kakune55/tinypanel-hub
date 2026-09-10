@@ -164,7 +164,7 @@ Invoke-RestMethod http://localhost:8080/api/v1/weather -Headers $headers
 
 ## 面板快照中的天气
 
-`GET /api/v1/snapshot` 是用户侧快照接口。启用和风天气后，快照里的 `weather` 字段同样来自天气缓存。消息、TODO 和遥测会按当前用户过滤。
+`GET /api/v1/snapshot` 是用户侧快照接口。启用和风天气后，快照里的 `weather` 字段同样来自天气缓存。消息和 TODO 会按当前用户过滤。遥测不进入快照，请使用 `GET /api/v1/devices/{device_id}/telemetry` 单独查询。
 
 ```http
 GET /api/v1/snapshot
@@ -229,8 +229,7 @@ Authorization: Bearer alice-token
       "status": "pending",
       "created_at": "2026-05-10T04:00:00Z"
     }
-  ],
-  "telemetry": []
+  ]
 }
 ```
 

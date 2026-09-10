@@ -13,6 +13,21 @@ import (
 	"tinypanel-hub/internal/store"
 )
 
+func TestDeviceMessagesFreshQueueIsEmptyArray(t *testing.T) {
+	handler := newTestHandler(t)
+	hello := deviceHello(t, handler, "tinypanel-001", "")
+	deviceSecret := hello["device_secret"].(string)
+
+	rec := deviceJSON(t, handler, http.MethodGet, "/api/v1/device/messages", "tinypanel-001", deviceSecret, "", http.StatusOK)
+	var payload map[string]json.RawMessage
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatal(err)
+	}
+	if string(payload["messages"]) != "[]" {
+		t.Fatalf("fresh queue messages = %s, want []", rec.Body.String())
+	}
+}
+
 func TestUserDeviceMessageFlow(t *testing.T) {
 	handler := newTestHandler(t)
 
@@ -35,8 +50,12 @@ func TestUserDeviceMessageFlow(t *testing.T) {
 
 	deviceJSON(t, handler, http.MethodPost, "/api/v1/device/messages/ack", "tinypanel-001", deviceSecret, `{"message_ids":[1]}`, http.StatusOK)
 	rec = deviceJSON(t, handler, http.MethodGet, "/api/v1/device/messages", "tinypanel-001", deviceSecret, "", http.StatusOK)
-	if strings.Contains(rec.Body.String(), `"body":"hello"`) {
-		t.Fatalf("acked message still pending: %s", rec.Body.String())
+	var payload map[string]json.RawMessage
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatal(err)
+	}
+	if string(payload["messages"]) != "[]" {
+		t.Fatalf("messages after all ACKed = %s, want []", rec.Body.String())
 	}
 }
 
@@ -100,6 +119,7 @@ func TestDeviceCanReadOwnerTodos(t *testing.T) {
 	if !strings.Contains(rec.Body.String(), `"todos":[`) || !strings.Contains(rec.Body.String(), `"text":"同步到设备"`) {
 		t.Fatalf("device snapshot missing todos: %s", rec.Body.String())
 	}
+	assertJSONFieldAbsent(t, rec.Body.Bytes(), "telemetry")
 }
 
 func TestUnboundDeviceTodosAreEmpty(t *testing.T) {
@@ -133,6 +153,12 @@ func TestDeviceTelemetryBatch(t *testing.T) {
 	if !strings.Contains(rec.Body.String(), `"count":1`) {
 		t.Fatalf("unexpected telemetry response: %s", rec.Body.String())
 	}
+
+	rec = userJSON(t, handler, http.MethodGet, "/api/v1/snapshot?include=weather,messages,todos,telemetry", userToken, "", http.StatusOK)
+	assertJSONFieldAbsent(t, rec.Body.Bytes(), "telemetry")
+
+	rec = deviceJSON(t, handler, http.MethodGet, "/api/v1/device/snapshot", "tinypanel-001", deviceSecret, "", http.StatusOK)
+	assertJSONFieldAbsent(t, rec.Body.Bytes(), "telemetry")
 }
 
 func TestWebFallbackDoesNotCatchAPI(t *testing.T) {
@@ -175,6 +201,17 @@ func createUser(t *testing.T, handler http.Handler, name string) string {
 	token := strings.ToLower(name) + "-token"
 	adminJSON(t, handler, http.MethodPost, "/api/v1/admin/users", `{"name":"`+name+`","api_token":"`+token+`"}`, http.StatusCreated)
 	return token
+}
+
+func assertJSONFieldAbsent(t *testing.T, body []byte, field string) {
+	t.Helper()
+	var payload map[string]any
+	if err := json.Unmarshal(body, &payload); err != nil {
+		t.Fatalf("invalid JSON response: %s", body)
+	}
+	if _, ok := payload[field]; ok {
+		t.Fatalf("field %q should be absent: %s", field, body)
+	}
 }
 
 func deviceHello(t *testing.T, handler http.Handler, deviceID, secret string) map[string]any {

@@ -489,6 +489,61 @@ main {
   stroke-width: 2;
 }
 
+.trend-point {
+  outline: none;
+}
+
+.trend-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.trend-hover-line {
+  stroke: rgba(21, 22, 18, .26);
+  stroke-dasharray: 4 4;
+  stroke-width: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trend-point-dot {
+  opacity: 0;
+  stroke: var(--panel);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.trend-tooltip {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trend-tooltip-box {
+  fill: rgba(21, 22, 18, .92);
+  stroke: rgba(255, 255, 255, .2);
+}
+
+.trend-tooltip-text {
+  fill: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.trend-tooltip-text.muted {
+  fill: rgba(255, 255, 255, .72);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.trend-point:hover .trend-hover-line,
+.trend-point:focus .trend-hover-line,
+.trend-point:hover .trend-point-dot,
+.trend-point:focus .trend-point-dot,
+.trend-point:hover .trend-tooltip,
+.trend-point:focus .trend-tooltip {
+  opacity: 1;
+}
+
 .trend-label {
   fill: var(--muted);
   font-size: 11px;

@@ -404,7 +404,7 @@ async function refreshWeather() {
 
 async function refreshSnapshot() {
   try {
-    const data = await api("/api/v1/snapshot?include=weather,messages,todos,telemetry", { headers: userHeaders() });
+    const data = await api("/api/v1/snapshot?include=weather,messages,todos", { headers: userHeaders() });
     state.snapshot = data;
     $("snapshotRaw").textContent = JSON.stringify(data, null, 2);
     renderSnapshotSummary();
@@ -594,7 +594,6 @@ function renderSnapshotSummary() {
   $("snapshotSummary").innerHTML = `
     <div class="stat-chip"><span>消息</span><strong>${snapshot.messages?.length || 0}</strong></div>
     <div class="stat-chip"><span>TODO</span><strong>${snapshot.todos?.length || 0}</strong></div>
-    <div class="stat-chip"><span>遥测</span><strong>${snapshot.telemetry?.length || 0}</strong></div>
     <div class="stat-chip"><span>天气</span><strong>${escapeHTML(snapshot.weather?.condition || "-")}</strong></div>
   `;
 }
@@ -678,6 +677,7 @@ function renderLineChart(points, options) {
   const firstTime = formatClock(coords[0].time);
   const lastTime = formatClock(coords[coords.length - 1].time);
   const latest = coords[coords.length - 1];
+  const hoverPoints = coords.map((point) => renderChartPoint(point, options, { width, height, pad })).join("");
 
   return `
     <svg class="trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="telemetry trend chart">
@@ -690,7 +690,35 @@ function renderLineChart(points, options) {
       <path class="trend-area" d="${area}" fill="${options.fill}"></path>
       <path class="trend-line" d="${line}" stroke="${options.color}"></path>
       <circle class="trend-dot" cx="${latest.x.toFixed(2)}" cy="${latest.y.toFixed(2)}" r="4" fill="${options.color}"></circle>
+      <g class="trend-points">${hoverPoints}</g>
     </svg>
+  `;
+}
+
+function renderChartPoint(point, options, chart) {
+  const x = Number(point.x.toFixed(2));
+  const y = Number(point.y.toFixed(2));
+  const tooltipWidth = 132;
+  const tooltipHeight = 42;
+  const tooltipY = Math.max(8, y - tooltipHeight - 12);
+  const tooltipX = Math.min(
+    Math.max(6, x - tooltipWidth / 2),
+    chart.width - tooltipWidth - 6
+  );
+  const value = formatMetric(point.value, options.suffix);
+  const time = formatDate(point.time);
+
+  return `
+    <g class="trend-point" tabindex="0" aria-label="${escapeAttr(`${value}, ${time}`)}">
+      <line class="trend-hover-line" x1="${x}" y1="${chart.pad.top}" x2="${x}" y2="${chart.height - chart.pad.bottom}"></line>
+      <circle class="trend-hit" cx="${x}" cy="${y}" r="8"></circle>
+      <circle class="trend-point-dot" cx="${x}" cy="${y}" r="4" fill="${options.color}"></circle>
+      <g class="trend-tooltip">
+        <rect class="trend-tooltip-box" x="${tooltipX.toFixed(2)}" y="${tooltipY.toFixed(2)}" width="${tooltipWidth}" height="${tooltipHeight}" rx="6"></rect>
+        <text class="trend-tooltip-text" x="${(tooltipX + 10).toFixed(2)}" y="${(tooltipY + 17).toFixed(2)}">${escapeHTML(value)}</text>
+        <text class="trend-tooltip-text muted" x="${(tooltipX + 10).toFixed(2)}" y="${(tooltipY + 33).toFixed(2)}">${escapeHTML(time)}</text>
+      </g>
+    </g>
   `;
 }
 

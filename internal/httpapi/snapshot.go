@@ -63,8 +63,5 @@ func filteredSnapshot(snapshot domain.Snapshot, include map[string]bool) map[str
 	if include["todos"] {
 		out["todos"] = snapshot.Todos
 	}
-	if include["telemetry"] {
-		out["telemetry"] = snapshot.Telemetry
-	}
 	return out
 }

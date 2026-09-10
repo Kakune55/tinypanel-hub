@@ -12,9 +12,8 @@ import (
 )
 
 const (
-	maxMessages          = 100
-	maxSnapshotTelemetry = 500
-	maxTelemetryHistory  = 5000
+	maxMessages         = 100
+	maxTelemetryHistory = 5000
 )
 
 var (

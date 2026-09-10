@@ -91,10 +91,9 @@ type Telemetry struct {
 }
 
 type Snapshot struct {
-	Weather   Weather     `json:"weather"`
-	Messages  []Message   `json:"messages"`
-	Todos     []Todo      `json:"todos"`
-	Telemetry []Telemetry `json:"telemetry"`
+	Weather  Weather   `json:"weather"`
+	Messages []Message `json:"messages"`
+	Todos    []Todo    `json:"todos"`
 }
 
 const (
